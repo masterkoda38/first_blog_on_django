@@ -1,0 +1,25 @@
+<!--Это будет структура наших HTML-шаблонов. Файл base.html содержит каркас
+верстки сайта и разделяет содержимое на два блока: основной и боковую панель. -->
+
+<!-- Строка {% load static %} говорит Django о том, что нужно импортировать шаблонный тег static.
+После его импортирования мы можем использовать запись {% static %}. С помощью этого тега можно
+подключать файлы статики (например, blog.css) -->
+
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>{% block title %}{% endblock %}</title>
+	<link href="{% static 'css/blog.css' %}" rel="stylesheet">
+</head>
+<body>
+	<div id="content">
+		{% block content %}
+		{% endblock %}
+	</div>
+	<div id="sidebar">
+		<h2>My blog</h2>
+		<p>This is my blog.</p>
+	</div>
+</body>
+</html>

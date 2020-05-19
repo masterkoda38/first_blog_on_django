@@ -1,0 +1,29 @@
+<!-- С помощью тега {% extends %} указываем, что list.html унаследован от базового шаблона blog/base.html. -->
+
+{% extends "blog/base.html" %}
+
+{% block title %}My Blog{% endblock %}
+
+{% block content %}
+  <h1>My Blog</h1>
+  {% for post in posts %}
+    <h2>
+      <a href="{{ post.get_absolute_url }}">
+        {{ post.title }}
+      </a>
+    </h2>
+    <p class="date">
+      Published {{ post.publish }} by {{ post.author }}
+    </p>
+<!-- В теле статьи мы применяем два фильтра: truncatewords, обрезающий текст после указанного
+ количества слов, и linebreaks, преобразующий вывод в HTML с переносами строки. -->
+    {{ post.body|truncatewords:30|linebreaks }}
+  {% endfor %}
+<!--  Так как страница Page передается в шаблон статей под именем posts, подключаем
+шаблон постраничного отображения, указав, чему будет равен параметр page.
+  {% include "pagination.html" with page=posts %} -->
+
+<!-- Базовый обработчик Django - ListView передает  объект в качестве переменной с именем page_obj, по-
+этому нужно подключая шаблон постраничного вывода, указать эту переменную -->
+  {% include "pagination.html" with page=page_obj %}
+{% endblock %}
