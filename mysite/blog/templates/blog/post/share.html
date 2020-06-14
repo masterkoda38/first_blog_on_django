@@ -1,0 +1,28 @@
+<!--Это шаблон для отображения формы или информации об успешной отправке сообщения.-->
+{% extends "blog/base.html" %}
+{% block title %}Share a post{% endblock %}
+{% block content %}
+    {% if sent %}
+        <h1>E-mail successfully sent</h1>
+        <p>"{{ post.title }}" was successfully sent to {{ form.cleaned_data.to }}.</p>
+    {% else %}
+    <h1>Share "{{ post.title }}" by e-mail</h1>
+<!--Мы создали HTML-элемент формы, который будет отправляться на сервер методом POST
+И добавили объект формы, дав Django указание сгенерировать ее поля как HTML-элементы параграфа <p>
+ с помощью метода as_p.-->
+    <form action="." method="post">
+        <!--{{ form.as_p }} Если мы хотим выводить каждое поле по отдельности,
+        можно итерировать по ним таким образом:-->
+        {% for field in form %}
+            <div>
+            {{ field.errors }}
+            {{ field.label_tag }} {{ field }}
+            </div>
+        {% endfor %}
+<!--Тег csrf_token представляет собой скрытое поле с автоматически сгенерированным токеном для защиты
+ от подделки межсайтовых запросов -->
+        {% csrf_token %}
+        <input type="submit" value="Send e-mail">
+    </form>
+    {% endif %}
+{% endblock %}

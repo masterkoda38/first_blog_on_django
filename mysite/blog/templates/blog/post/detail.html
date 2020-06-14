@@ -6,4 +6,61 @@
 	<h1>{{ post.title }}</h1>
 	<p class="date">Published {{ post.publish }} by {{ post.author }}</p>
 	{{ post.body|linebreaks }}
+<!-- Ссылка для доступа к странице формы. Lля динамического формирования ссылок используется шаблонный
+тег url. Мы задаем пространство имен blog и URL с названием post_share, добавляем ID статьи
+ в качестве параметра и благодаря этому получаем абсолютный URL.-->
+	<p>
+		<a href="{% url 'blog:post_share' post.id %}">Поделиться статьей по электронке</a>
+	</p>
+    <!-- добавьте следующий фрагмент для отображения рекомендуемых статей перед списком комментариев-->
+
+    <!--Список тегов на страницу статьи-->
+    <h3 class="tags">
+        Рекомендованные Вам статьи по тегам
+        {% for tag in post.tags.all %}
+            <a href="{% url 'blog:post_list_by_tag' tag.slug %}">{{ tag.name }}</a>
+            {% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </h3>
+    {# Similar_posts #}
+    {% for similar_post in similar_posts %}
+      <h3>
+        <a href="{{ similar_post.get_absolute_url }}">
+          {{ similar_post.title }}
+        </a>
+      </h3>
+    {% endfor %}
+<!--Мы используем ORM Django в шаблоне, выполняя comments.count(). Обратите внимание,
+что для вызова функций в шаблонах не нужно указывать круглые скобки. Тег with позволяет
+назначить переменной новое имя, которое можно использовать внутри блока до ближайшего тега endwith.-->
+	{% with comments.count as total_comments %}
+		<h2>{{ total_comments }} comment{{ total_comments|pluralize }}</h2>
+	{% endwith %}
+<!--Здесь используется тег for для итерации по комментариям. Каждый комментарий пронумерован
+ с помощью переменной forloop.counter, }}, которая содержит номер текущей итерации цикла.-->
+    {# Comments #}
+    {% for comment in comments %}
+        <div class="comment">
+            <p class="info">
+				<!--мы отображаем имя автора, дату создания и текст комментария-->
+                Comment {{ forloop.counter }} by {{ comment.name }}
+                {{ comment.created }}
+            </p>
+            {{ comment.body|linebreaks }}
+        </div>
+    {% empty %}
+        <p>Здесь нет комментариев</p>
+    {% endfor %}
+<!--если new_comment не существует, мы показываем поля формы создания комментария,
+в противном случае отображаем сообщение о его успешном сохранении.-->
+	{% if new_comment %}
+        <h2>Ваш комментарий был добавлен</h2>
+    {% else %}
+        <h2>Написать новый комментарий</h2>
+        <form action="." method="post">
+            {% csrf_token %}
+            {{ comment_form.as_p }}
+            <p><input type="submit" value="Add comment"></p>
+        </form>
+    {% endif %}
 {% endblock %}

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages', # подсистема сообщений
     'django.contrib.staticfiles', # подсистема для управления статическим содержимым сайта
     'blog.apps.BlogConfig',
+    'taggit',
 ]
 
 MIDDLEWARE = [
@@ -125,3 +126,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# EMAIL
+# Для начала необходимо установить локальный SMTP-сервер или сконфигурировать доступ к внешнему SMTP-серверу
+# Если нельзя использовать SMTP-сервер, можно дать Django указание записывать адреса в консоль
+
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Если вы хотите отправлять сообщения, но на вашем компьютере не установлен локальный почтовый сервер,
+# можете использовать SMTP-сервер вашего почтового провайдера. Следующая конфигурация позволяет отправлять
+# e-mail-сообщения, используя Gmail-сервер и ваш аккаунт Google:
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'your_account@gmail.com'
+EMAIL_HOST_PASSWORD = 'your_password'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True

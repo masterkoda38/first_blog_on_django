@@ -5,6 +5,8 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse
+from taggit.managers import TaggableManager
+
 
 # Собственный менеджер для получения всех опубликованных статей.
 class PublishedManager(models.Manager):
@@ -31,15 +33,21 @@ class Post(models.Model):
     # поле отображает статус статьи. Мы использовали параметр CHOICES, для того чтобы ограничить
     # возможные значения из указанного выше списка STATUS_CHOICES.
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
-    objects = models.Manager() # Менеджер по умолчанию, Он возвращает все объекты из базы.
-    published = PublishedManager() # Наш новый менеджер.
+    objects = models.Manager()  # Менеджер по умолчанию, Он возвращает все объекты из базы.
+    published = PublishedManager()  # Наш новый менеджер.
+    tags = TaggableManager()  # Позволит нам добавлять, получать список и удалять теги для объектов статей
+
+
+    # Добавим функцию, обрабатыающую теги в виде списка строк.
+    def _tags(self):
+        return [t.name for t in self.tags.all()]
+
 
     # В Django метод модели get_absolute_url() должен возвращать канонический URL объекта.
     # Для реализации этого поведения мы будем использовать функцию reverse(),
     # которая дает возможность получать URL, указав имя шаблона и параметры.
     def get_absolute_url(self):
         return reverse('blog:post_detail', args=[self.publish.year, self.publish.month, self.publish.day, self.slug])
-
 
     # Класс Meta внутри модели содержит метаданные. Мы указали Django порядок сортировки статей по умолчанию
     #  – по убыванию даты публикации О том, что порядок убывающий, говорит префикс «-».
@@ -50,3 +58,25 @@ class Post(models.Model):
     # Django использует его во многих случаях, например на сайте администрирования.
     def __str__(self):
         return self.title
+
+
+# Модель содержит ForeignKey для привязки к определенной статье.
+class Comment(models.Model):
+    # Атрибут related_name позволяет получить доступ к комментариям конкретной статьи.
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    name = models.CharField(max_length=80)
+    email = models.EmailField()
+    body = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    # добавили булевое поле active, для того чтобы была возможность скрыть некоторые комментарии
+    active = models.BooleanField(default=True)
+
+    # определили поле created для сортировки комментариев в хронологическом порядке
+    class Meta:
+        ordering = ('created',)
+
+    def __str__(self):
+        return 'Comment by {} on {}'.format(self.name, self.post)
+
+
