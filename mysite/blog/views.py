@@ -2,12 +2,13 @@ from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic import ListView
 from .models import Post, Comment
-from .forms import EmailPostForm, CommentForm
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+from .forms import EmailPostForm, CommentForm, SearchForm
 from taggit.models import Tag
 from django.db.models import Count
+from django.contrib.postgres.search import TrigramSimilarity
 # Это функция агрегации Count из Django. Она позволяет выполнять агрегирующий запрос
 #  для подсчета количества тегов на уровне базы данных.
-
 
 # Django имеет встроенный класс для постраничного отображения - Paginator,, который позволит нам легко управлять им.
 # Отредактируйте views.py, импортируйте классы-пагинаторы из Django и добавьте их в обработчик post_list:
@@ -118,3 +119,25 @@ def post_share(request, post_id):
     else:
         form = EmailPostForm()
     return render(request, 'blog/post/share.html', {'post': post, 'form': form, 'sent': sent})
+
+
+# В добавленном коде мы создаем объект формы SearchForm. Поисковый запрос будет отправляться методом GET,
+# чтобы результирующий URL содержал в себе фразу поиска в параметре query.
+def post_search(request):
+    form = SearchForm()
+    query = None
+    results = []
+    if 'query' in request.GET:
+        # Инициируем объект формы с параметрами
+        form = SearchForm(request.GET)
+        # Проверяем корректность введенных данных
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            # мы создаем объект SearchQuery, фильтруем с его помощью результаты и используем SearchRank
+            # для ранжирования статей.
+            # search_vector = SearchVector('title', weight='A') + SearchVector('body', weight='B')
+            # search_query = SearchQuery(query)
+            # Формируем запрос на поиск статей с использованием объекта SearchVector
+            results = Post.objects.annotate(similarity=TrigramSimilarity('title', query),)\
+                .filter(similarity__gt=0.2).order_by('-similarity')
+    return render(request, 'blog/post/search.html', {'form': form, 'query': query, 'results': results})

@@ -4,12 +4,14 @@
 
 from django.urls import path
 from . import views
+from .feeds import LatestPostsFeed
 
 # Мы определили пространство имен приложения в переменной app_name.
 app_name = 'blog'
 
 urlpatterns = [
-    # закомментируйте шаблон для обработчика PostListView и раскомментируйте шаблон для post_list
+    # закомментируйте шаблон для обработчика PostListView
+    #  и раскомментируйте шаблон для post_list
     path('', views.post_list, name='post_list'),
     # Добавьте дополнительный URL-шаблон, чтобы была возможность обратиться к списку статей,
     # связанных с определенным тегом
@@ -19,4 +21,6 @@ urlpatterns = [
          views.post_detail,
          name='post_detail'),
     path('<int:post_id>/share/', views.post_share, name='post_share'),
+    path('feed/', LatestPostsFeed(), name='post_feed'),
+    path('search/', views.post_search, name='post_search'),
 ]

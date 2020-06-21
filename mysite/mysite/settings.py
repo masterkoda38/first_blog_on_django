@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-
+SITE_ID = 1
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles', # подсистема для управления статическим содержимым сайта
     'blog.apps.BlogConfig',
     'taggit',
+    'django.contrib.sites',
+    'django.contrib.sitemaps',
+    'django.contrib.postgres',
 ]
 
 MIDDLEWARE = [
@@ -79,11 +82,14 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # Мы можем определить используемую в проекте СУБД в файле settings.py в настройке DATABASES.
 # Django одновременно поддерживает работу с несколькими базами данных: MySQL, PostgreSQL, SQLite и Oracle.
 # По умолчанию используется SQLite.
-
+# Замените настройку DATABASES на использование PostgreSQL.
+# Замените пароль из примера на ваш пароль для пользователя blog
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'blog',
+        'USER': 'blog',
+        'PASSWORD': 'JGFkzkzvf2',
     }
 }
 
